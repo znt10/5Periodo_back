@@ -35,3 +35,4 @@ uritemplate==4.2.0
 weasyprint==66.0
 webencodings==0.5.1
 zopfli==0.4.1
+gunicorn==23.0.0

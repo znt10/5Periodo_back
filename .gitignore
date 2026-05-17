@@ -20,6 +20,7 @@ __pyo__
 .__pycache__
 .pyc 
 settings.py
+!backend/backend/settings.py
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
