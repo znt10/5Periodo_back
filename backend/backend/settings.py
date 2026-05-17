@@ -1,9 +1,14 @@
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BACKEND_DIR = BASE_DIR / "backend"
+
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
 
 SECRET_KEY = os.getenv(
     "SECRET_KEY",
@@ -30,7 +35,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "drf_spectacular",
-    "backend.app",
+    "app",
 ]
 
 MIDDLEWARE = [
@@ -43,8 +48,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
-ROOT_URLCONF = "backend.urls"
 
 TEMPLATES = [
     {
@@ -61,10 +64,10 @@ TEMPLATES = [
     },
 ]
 
-ROOT_URLCONF = "backend.backend.urls"
+ROOT_URLCONF = "backend.urls"
 
-WSGI_APPLICATION = "backend.backend.wsgi.application"
-ASGI_APPLICATION = "backend.backend.asgi.application"
+WSGI_APPLICATION = "backend.wsgi.application"
+ASGI_APPLICATION = "backend.asgi.application"
 
 if os.getenv("DB_ENGINE"):
     DATABASES = {
@@ -133,7 +136,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "backend.app.authentication.CookieJWTAuthentication",
+        "app.authentication.CookieJWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
