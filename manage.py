@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 import os
+from pathlib import Path
 import sys
 
 
 def main():
-    os.environ.setdefault(
-    "DJANGO_SETTINGS_MODULE",
-    "backend.backend.settings"
-)
+    sys.path.insert(0, str(Path(__file__).resolve().parent / "backend"))
+    os.environ["DJANGO_SETTINGS_MODULE"] = "backend.settings"
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
