@@ -61,9 +61,10 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "backend.wsgi.application"
-ASGI_APPLICATION = "backend.asgi.application"
+ROOT_URLCONF = "backend.backend.urls"
 
+WSGI_APPLICATION = "backend.backend.wsgi.application"
+ASGI_APPLICATION = "backend.backend.asgi.application"
 
 if os.getenv("DB_ENGINE"):
     DATABASES = {
@@ -132,7 +133,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "app.authentication.CookieJWTAuthentication",
+        "backend.app.authentication.CookieJWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
