@@ -107,6 +107,8 @@ class LoginView(APIView):
                     if loja_vinculada
                     else None,
                 },
+                "access": str(access),
+                "refresh": str(refresh),
             }
         )
 
