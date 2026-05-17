@@ -1,0 +1,48 @@
+[
+  {
+    "model": "auth.group",
+    "fields": {
+      "name": "Gerente",
+      "permissions": [
+        ["add_loja", "app", "loja"],
+        ["change_loja", "app", "loja"],
+        ["delete_loja", "app", "loja"],
+        ["view_loja", "app", "loja"],
+        ["add_produto", "app", "produto"],
+        ["change_produto", "app", "produto"],
+        ["delete_produto", "app", "produto"],
+        ["view_produto", "app", "produto"],
+        ["add_estoque", "app", "estoque"],
+        ["change_estoque", "app", "estoque"],
+        ["delete_estoque", "app", "estoque"],
+        ["view_estoque", "app", "estoque"],
+        ["add_pedido", "app", "pedido"],
+        ["change_pedido", "app", "pedido"],
+        ["delete_pedido", "app", "pedido"],
+        ["view_pedido", "app", "pedido"],
+        ["add_itempedido", "app", "itempedido"],
+        ["change_itempedido", "app", "itempedido"],
+        ["delete_itempedido", "app", "itempedido"],
+        ["view_itempedido", "app", "itempedido"]
+      ]
+    }
+  },
+  {
+    "model": "auth.group",
+    "fields": {
+      "name": "Responsavel",
+      "permissions": [
+        ["view_loja", "app", "loja"],
+        ["view_produto", "app", "produto"],
+        ["view_estoque", "app", "estoque"],
+        ["add_pedido", "app", "pedido"],
+        ["change_pedido", "app", "pedido"],
+        ["view_pedido", "app", "pedido"],
+        ["add_itempedido", "app", "itempedido"],
+        ["change_itempedido", "app", "itempedido"],
+        ["delete_itempedido", "app", "itempedido"],
+        ["view_itempedido", "app", "itempedido"]
+      ]
+    }
+  }
+]

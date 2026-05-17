@@ -1,0 +1,25 @@
+# Ambiente virtual
+venv/
+env/
+.venv/
+.db.sqlite3
+
+# Arquivos de ambiente (variáveis sensíveis)
+.env
+
+# Python
+__pycache__/
+*.pyc
+__pyo__
+*.pyo
+*.pyd
+# Django
+*.log
+*.pot
+*.pyc
+.__pycache__
+.pyc 
+settings.py
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
