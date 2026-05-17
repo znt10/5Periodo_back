@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "drf_spectacular",
-    "app",
+    "backend.app",
 ]
 
 MIDDLEWARE = [
