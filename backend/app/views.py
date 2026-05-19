@@ -31,7 +31,7 @@ def relatorio_pdf(request: HttpRequest,) -> HttpResponse:
 
 class CookieTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
-        refresh_token = request.COOKIES.get("refresh_token")
+        refresh_token = request.COOKIES.get("refresh_token") or request.data.get("refresh")
 
         if not refresh_token:
             return Response(
