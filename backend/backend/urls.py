@@ -8,7 +8,7 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 from app.api.v1.router import urlpatterns as api_urlpatterns
-from app.views import LoginView,LogoutView,relatorio_pdf,CookieTokenRefreshView, seed_produtos
+from app.views import LoginView,LogoutView,relatorio_pdf,CookieTokenRefreshView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -20,6 +20,5 @@ urlpatterns = [
     path('token/refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('gerar_pdf/',relatorio_pdf,name='gerar_pdf'),
-    path('seed_produtos/', seed_produtos, name='seed_produtos'),
 ]
     

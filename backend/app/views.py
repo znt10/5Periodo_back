@@ -27,77 +27,7 @@ def relatorio_pdf(request: HttpRequest,) -> HttpResponse:
  
     return gerar_relatorio_pedidos_pdf(periodo)
  
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from app.models import Produto
-
-
-@api_view(["GET"])
-def seed_produtos(request):
-    dados = {
-        "ESFIHAS GDE": [
-            "Carne", "Frango", "Bauru", "calabresa",
-            "Hamburger", "Salsicha com cheddar", "Torta de banana"
-        ],
-        "ESFIHAS MINI": [
-            "Carne", "Frango", "Bauru", "calabresa",
-            "Hamburger", "Salsicha com cheddar", "Torta de banana"
-        ],
-        "FOGAZZAS GDE": [
-            "Presunto e Queijo", "2 Queijos", "Calabresa",
-            "Frango", "Pizza", "Chocolate", "Doce de leite"
-        ],
-        "FOGAZZAS MINI": [
-            "Presunto e Queijo", "2 Queijos", "Calabresa",
-            "Frango", "Pizza", "Chocolate", "Doce de leite"
-        ],
-
-    "RECHEIOS": [
-        "Açúcar+canela",
-        "Bisnaga de chocolate",
-        "Bisnaga doce de leite",
-        "Bisnaga Beijinho",
-        "Calabresa",
-        "Carne",
-        "Catupiry",
-        "Frango",
-        "Laranja",
-        "Limão",
-        "Massa de empada",
-        "Massa Pastel",
-        "Mussarela",
-        "Óleo",
-        "Orégano",
-        "Ovo",
-        "Palmito",
-        "Pimenta",
-        "Presunto",
-        "Tomate",
-    ],
-
-    "MERCADO": [
-        "Açúcar",
-        "Café",
-        "Detergente",
-        "Leite",
-        "Nescau",
-        "Bombril",
-        "Adoçante",
-    ],
-
-    }
-
-    total = 0
-
-    for categoria, produtos in dados.items():
-        for nome in produtos:
-            Produto.objects.get_or_create(
-                nome=nome,
-                categoria=categoria,
-            )
-            total += 1
-
-    return Response({"message": f"{total} produtos cadastrados"})
+ 
 
 class CookieTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
