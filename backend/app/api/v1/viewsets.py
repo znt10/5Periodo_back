@@ -46,8 +46,40 @@ class LojaViewSet(viewsets.ModelViewSet):
 class EstoqueViewSet(viewsets.ModelViewSet,ResponsavelOuAdminMixin):
     queryset = Estoque.objects.all()
     serializer_class = EstoqueSerializer
-    permission_classes = [IsAuthenticated,IsGerenteOrAdministrador]
+    permission_classes = [IsAuthenticated, IsGerenteOrAdministradorOrResponsavel]
     lookup_field = 'public_id'
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = Estoque.objects.all()
+
+        if is_gerente_ou_admin(user):
+            return queryset
+
+        return queryset.filter(loja__responsavel=user)
+
+    def _validar_loja_do_responsavel(self, user, loja):
+        if is_gerente_ou_admin(user):
+            return
+
+        if not loja or loja.responsavel_id != user.id:
+            raise PermissionDenied("Voce so pode editar o estoque da sua loja.")
+
+    def perform_create(self, serializer):
+        self._validar_loja_do_responsavel(
+            self.request.user,
+            serializer.validated_data.get('loja')
+        )
+        serializer.save()
+
+    def perform_update(self, serializer):
+        loja = serializer.validated_data.get('loja', serializer.instance.loja)
+        self._validar_loja_do_responsavel(self.request.user, loja)
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        self._validar_loja_do_responsavel(self.request.user, instance.loja)
+        instance.delete()
 
 
 # 🔹 PRODUTO
@@ -175,9 +207,6 @@ class PedidoViewSet( viewsets.ModelViewSet):
 
     @action(detail=True, methods=['patch'], url_path='status')
     def atualizar_status(self, request, public_id=None):
-        if not is_gerente_ou_admin(request.user):
-            raise PermissionDenied("Apenas gerente ou administrador pode alterar o status do pedido.")
-
         pedido = self.get_object()
         status_novo = request.data.get('status')
 
