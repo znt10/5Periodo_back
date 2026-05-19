@@ -35,6 +35,8 @@ class Produto(BaseModel):
         SALGADOS_MINI = "SALGADOS_MINI", "Salgados mini"
         ESFIHAS_GDE = "ESFIHAS_GDE", "Esfihas grande"
         ESFIHAS_MINI = "ESFIHAS_MINI", "Esfihas mini"
+        FOGAZZAS_GDE = "FOGAZZAS_GDE", "Fogazzas grande"
+        FOGAZZAS_MINI = "FOGAZZAS_MINI", "Fogazzas mini"
         RECHEIOS = "RECHEIOS", "Recheios"
         MERCADO = "MERCADO", "Mercado"
 
