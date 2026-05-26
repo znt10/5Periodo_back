@@ -6,6 +6,7 @@ charset-normalizer==3.4.7
 cssselect2==0.9.0
 Django==6.0.3
 django-cors-headers==4.9.0
+whitenoise==6.11.0
 djangorestframework==3.17.1
 djangorestframework_simplejwt==5.5.1
 dnspython==2.8.0
