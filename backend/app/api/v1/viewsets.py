@@ -10,19 +10,25 @@ from django.utils.timezone import make_aware
 
 
 from django.contrib.auth.models import User
+from django.db.models import F
 
 from app.models import Pedido, ItemPedido, Produto, Loja, Estoque, Notificacao
 from .mixins import ApenasAdminPodeCriarMixin, ResponsavelOuAdminMixin, UserOuAdminMixin
 from .serializers import (
+    EstoqueCreateSerializer,
     PedidoSerializer,
+    PedidoCreateSerializer,
+    PedidoUpdateSerializer,
     ItemPedidoSerializer,
     ProdutoSerializer,
     UsuarioSerializer,
     LojaSerializer,
     EstoqueSerializer,
+    EstoqueUpdateSerializer,
     NotificacaoSerializer
 )
 from app.permissions import IsGerenteOrAdministrador, IsGerenteOrAdministradorOrResponsavel
+from app.notifications import notificar_estoques_baixos_do_pedido, notificar_estoque_baixo
 from rest_framework.decorators import action
 
 # 🔹 Helper
@@ -61,6 +67,13 @@ class EstoqueViewSet(viewsets.ModelViewSet,ResponsavelOuAdminMixin):
     permission_classes = [IsAuthenticated, IsGerenteOrAdministradorOrResponsavel]
     lookup_field = 'public_id'
 
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return EstoqueCreateSerializer
+        if self.action in ['update', 'partial_update']:
+            return EstoqueUpdateSerializer
+        return EstoqueSerializer
+
     def get_queryset(self):
         user = self.request.user
         queryset = Estoque.objects.all()
@@ -69,6 +82,21 @@ class EstoqueViewSet(viewsets.ModelViewSet,ResponsavelOuAdminMixin):
             return queryset
 
         return queryset.filter(loja__responsavel=user)
+
+    def list(self, request, *args, **kwargs):
+        estoques_baixos = self.filter_queryset(
+            self.get_queryset()
+            .select_related('loja__responsavel', 'produto')
+            .filter(
+                quantidade_minima__gt=0,
+                quantidade_atual__lte=F('quantidade_minima'),
+            )
+        )
+
+        for estoque in estoques_baixos:
+            notificar_estoque_baixo(estoque, usuario_editor=request.user)
+
+        return super().list(request, *args, **kwargs)
 
     def _validar_loja_do_responsavel(self, user, loja):
         if is_gerente_ou_admin(user):
@@ -165,6 +193,13 @@ class PedidoViewSet( viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     lookup_field = 'public_id'
 
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return PedidoCreateSerializer
+        if self.action in ['update', 'partial_update']:
+            return PedidoUpdateSerializer
+        return PedidoSerializer
+
     def get_queryset(self):
         user = self.request.user
         queryset = Pedido.objects.all().order_by('-data_pedido')
@@ -216,6 +251,7 @@ class PedidoViewSet( viewsets.ModelViewSet):
             )
             estoque.quantidade_atual += item.quantidade
             estoque.save(update_fields=['quantidade_atual', 'updated_at'])
+            notificar_estoque_baixo(estoque)
 
     @action(detail=True, methods=['patch'], url_path='status')
     def atualizar_status(self, request, public_id=None):
@@ -240,6 +276,8 @@ class PedidoViewSet( viewsets.ModelViewSet):
 
         if status_novo == Pedido.Status.ENTREGUE and status_anterior != Pedido.Status.ENTREGUE:
             self._somar_itens_no_estoque(pedido)
+
+        notificar_estoques_baixos_do_pedido(pedido, usuario_editor=request.user)
 
         serializer = self.get_serializer(pedido)
         return Response(serializer.data)

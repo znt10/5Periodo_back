@@ -30,6 +30,13 @@ class Loja(BaseModel):
 
 
 class Produto(BaseModel):
+    class UnidadeMedida(models.TextChoices):
+        UNIDADE = "UNIDADE", "Unidade"
+        CAIXA = "CAIXA", "Caixa"
+        PACOTE = "PACOTE", "Pacote"
+        QUILO = "QUILO", "Quilo"
+        LITRO = "LITRO", "Litro"
+
     class Categoria(models.TextChoices):
         SALGADOS_GDE = "SALGADOS_GDE", "Salgados grande"
         SALGADOS_MINI = "SALGADOS_MINI", "Salgados mini"
@@ -42,7 +49,13 @@ class Produto(BaseModel):
 
     nome_produto = models.CharField(max_length=100)
     codigo = models.CharField(max_length=50)
-    unidade_medida = models.CharField(max_length=20)
+    unidade_medida = models.CharField(
+        max_length=20,
+        choices=UnidadeMedida.choices,
+        default=UnidadeMedida.UNIDADE,
+    )
+    quantidade_por_embalagem = models.PositiveIntegerField(null=True, blank=True)
+    estoque_minimo_sugerido = models.PositiveIntegerField(default=1)
     categoria = models.CharField(
         max_length=30,
         choices=Categoria.choices,
