@@ -66,7 +66,10 @@ class PedidoSerializer(serializers.ModelSerializer):
                 **item 
             )
 
-        gerentes = User.objects.filter(groups__name='Gerente') | User.objects.filter(is_superuser=True)
+        gerentes = (
+            User.objects.filter(groups__name__in=['Admin', 'Gerente'])
+            | User.objects.filter(is_superuser=True)
+        )
         gerentes = gerentes.distinct()
 
         for gerente in gerentes:

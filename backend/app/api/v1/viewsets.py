@@ -27,7 +27,19 @@ from rest_framework.decorators import action
 
 # 🔹 Helper
 def is_gerente_ou_admin(user):
-    return user.is_superuser or user.groups.filter(name='Gerente').exists()
+    return (
+        user.is_superuser
+        or user.groups.filter(name='Admin').exists()
+        or user.groups.filter(name='Gerente').exists()
+    )
+
+
+def get_user_group_name(user):
+    if user.is_superuser or user.groups.filter(name='Admin').exists():
+        return 'Admin'
+
+    group = user.groups.first()
+    return group.name if group else None
 
     
 # 🔹 LOJA
@@ -242,9 +254,7 @@ class UsuarioViewSet(UserOuAdminMixin, viewsets.ModelViewSet):
     def me(self, request):
             user = request.user
             
-            group = None
-            if user.groups.exists():
-                group = user.groups.first().name
+            group = get_user_group_name(user)
 
             # Busca a loja vinculada (ajuste o filtro conforme seu banco)
             loja_vinculada = Loja.objects.filter(responsavel=user).first()

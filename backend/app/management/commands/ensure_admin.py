@@ -1,7 +1,7 @@
 import os
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, Permission
 from django.core.management.base import BaseCommand
 
 
@@ -29,8 +29,10 @@ class Command(BaseCommand):
         user.set_password(password)
         user.save()
 
-        group, _ = Group.objects.get_or_create(name="Gerente")
-        user.groups.add(group)
+        admin_group, _ = Group.objects.get_or_create(name="Admin")
+        admin_permissions = Permission.objects.filter(content_type__app_label="app")
+        admin_group.permissions.set(admin_permissions)
+        user.groups.set([admin_group])
 
         action = "created" if created else "updated"
         self.stdout.write(

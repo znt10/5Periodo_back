@@ -3,7 +3,11 @@ from rest_framework.exceptions import PermissionDenied
 
 class BaseMixin:
     def is_admin(self, user):
-        return user.is_superuser or user.groups.filter(name='Gerente').exists()
+        return (
+            user.is_superuser
+            or user.groups.filter(name='Admin').exists()
+            or user.groups.filter(name='Gerente').exists()
+        )
 
 
 class ResponsavelOuAdminMixin(BaseMixin):

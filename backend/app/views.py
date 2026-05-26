@@ -19,6 +19,16 @@ from app.relatorios.pedidos_pdf import gerar_relatorio_pedidos_pdf
 User = get_user_model()
 
 permission_classes = [IsAuthenticated]
+
+
+def get_user_group_name(user):
+    if user.is_superuser or user.groups.filter(name="Admin").exists():
+        return "Admin"
+
+    group = user.groups.first()
+    return group.name if group else None
+
+
 def relatorio_pdf(request: HttpRequest,) -> HttpResponse:
     periodo = request.GET.get("periodo", "dia")
  
@@ -76,9 +86,9 @@ class LoginView(APIView):
 
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
-        group = user.groups.first()
+        role = get_user_group_name(user)
 
-        if group is None:
+        if role is None:
             return Response(
                 {
                     "error": (
@@ -89,7 +99,6 @@ class LoginView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        role = group.name
         loja_vinculada = Loja.objects.filter(responsavel=user).first()
 
         response = Response(
