@@ -10,6 +10,7 @@ class IsGerenteOrAdministrador(BasePermission):
 
         return (
             user.is_superuser or
+            user.groups.filter(name='Admin').exists() or
             user.groups.filter(name='Gerente').exists()
         )
 
@@ -28,6 +29,7 @@ class IsGerenteOrAdministradorOrResponsavel(BasePermission):
         # Escrita — só gerente/admin/responsavel
         return (
             user.is_superuser or
+            user.groups.filter(name='Admin').exists() or
             user.groups.filter(name='Gerente').exists() or
             user.groups.filter(name='Responsavel').exists()
         )
@@ -40,7 +42,11 @@ class IsGerenteOrAdministradorOrResponsavel(BasePermission):
             return True
 
         # Gerente/admin → tudo
-        if user.is_superuser or user.groups.filter(name='Gerente').exists():
+        if (
+            user.is_superuser
+            or user.groups.filter(name='Admin').exists()
+            or user.groups.filter(name='Gerente').exists()
+        ):
             return True
 
         # Responsável → só o que é dele

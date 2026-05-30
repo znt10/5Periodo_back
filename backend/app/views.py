@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, get_user_model
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
@@ -19,6 +19,16 @@ from app.relatorios.pedidos_pdf import gerar_relatorio_pedidos_pdf
 User = get_user_model()
 
 permission_classes = [IsAuthenticated]
+
+
+def get_user_group_name(user):
+    if user.is_superuser or user.groups.filter(name="Admin").exists():
+        return "Admin"
+
+    group = user.groups.first()
+    return group.name if group else None
+
+
 def relatorio_pdf(request: HttpRequest,) -> HttpResponse:
     periodo = request.GET.get("periodo", "dia")
  
@@ -62,6 +72,9 @@ class CookieTokenRefreshView(TokenRefreshView):
 
 
 class LoginView(APIView):
+    authentication_classes = []
+    permission_classes = [AllowAny]
+
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")
@@ -76,9 +89,9 @@ class LoginView(APIView):
 
         refresh = RefreshToken.for_user(user)
         access = refresh.access_token
-        group = user.groups.first()
+        role = get_user_group_name(user)
 
-        if group is None:
+        if role is None:
             return Response(
                 {
                     "error": (
@@ -89,7 +102,6 @@ class LoginView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        role = group.name
         loja_vinculada = Loja.objects.filter(responsavel=user).first()
 
         response = Response(

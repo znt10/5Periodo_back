@@ -1,7 +1,8 @@
 from django.test import TestCase
 from django.contrib.auth.models import User, Group,Permission
 from django.contrib.contenttypes.models import ContentType
-from app.models import Loja, Produto, Pedido, ItemPedido, Estoque
+from app.models import Loja, Produto, Pedido, ItemPedido, Estoque, Notificacao
+from app.notifications import notificar_estoque_baixo
 from rest_framework.test import APITestCase
 from rest_framework.test import APIClient
 from django.urls import reverse
@@ -39,8 +40,8 @@ class PedidoAPITestCase(APITestCase):
     
         self.produto = Produto.objects.create(
             nome_produto="coxinha",
-            codigo=1,
-            unidade_medida="kg"
+            unidade_medida="QUILO",
+            categoria="SALGADOS_GDE",
         )
         # Loja
         self.loja = Loja.objects.create(
@@ -106,9 +107,8 @@ class PedidoAPITestCase(APITestCase):
 
         produto_data = {
             "nome_produto": "Produto X",
-            "codigo": "PX",
-            "unidade_medida": "un",
-            "ativo": True
+            "unidade_medida": "UNIDADE",
+            "categoria": "MERCADO",
         }
 
         response = self.client.post(url_produto, produto_data)
@@ -155,16 +155,13 @@ class PedidoAPITestCase(APITestCase):
 
         data = {
             "nome_produto": "Produto Teste",
-            "codigo": "PT",
-            "unidade_medida": "un",
-            "ativo": True
+            "unidade_medida": "UNIDADE",
+            "categoria": "MERCADO",
         }
 
         response = self.client.post(url, data)
 
         self.assertEqual(response.status_code, 403)
-
-
 
     def test_responsavel_nao_pode_criar_loja(self):
         self.client.force_authenticate(user=self.responsavel)
@@ -182,3 +179,93 @@ class PedidoAPITestCase(APITestCase):
         self.assertEqual(response.status_code, 403)
     
  
+class NotificacaoEstoqueBaixoTestCase(TestCase):
+    def test_notifica_apenas_responsavel_da_loja_com_estoque_baixo(self):
+        grupo_responsavel, _ = Group.objects.get_or_create(name='Responsavel')
+        responsavel_loja_1 = User.objects.create_user(
+            username='loja1',
+            email='loja1@email.com',
+            password='123456',
+        )
+        responsavel_loja_1.groups.add(grupo_responsavel)
+        responsavel_loja_2 = User.objects.create_user(
+            username='loja2',
+            email='loja2@email.com',
+            password='123456',
+        )
+        responsavel_loja_2.groups.add(grupo_responsavel)
+
+        loja_1 = Loja.objects.create(
+            nome_loja='Loja 1',
+            cidade='Cidade 1',
+            endereco='Rua 1',
+            responsavel=responsavel_loja_1,
+        )
+        Loja.objects.create(
+            nome_loja='Loja 2',
+            cidade='Cidade 2',
+            endereco='Rua 2',
+            responsavel=responsavel_loja_2,
+        )
+        produto = Produto.objects.create(
+            nome_produto='Coxinha',
+            categoria='SALGADOS_GDE',
+            estoque_minimo_sugerido=5,
+        )
+        estoque = Estoque.objects.create(
+            loja=loja_1,
+            produto=produto,
+            quantidade_atual=3,
+            quantidade_minima=5,
+        )
+
+        notificar_estoque_baixo(estoque)
+
+        self.assertTrue(
+            Notificacao.objects.filter(
+                usuario=responsavel_loja_1,
+                tipo='estoque_baixo',
+            ).exists()
+        )
+        self.assertFalse(
+            Notificacao.objects.filter(
+                usuario=responsavel_loja_2,
+                tipo='estoque_baixo',
+            ).exists()
+        )
+
+    def test_nao_duplica_notificacao_do_mesmo_estoque(self):
+        usuario = User.objects.create_user(
+            username='loja',
+            email='loja@email.com',
+            password='123456',
+        )
+        loja = Loja.objects.create(
+            nome_loja='Loja',
+            cidade='Cidade',
+            endereco='Rua',
+            responsavel=usuario,
+        )
+        produto = Produto.objects.create(
+            nome_produto='Esfiha',
+            categoria='ESFIHAS_GDE',
+        )
+        estoque = Estoque.objects.create(
+            loja=loja,
+            produto=produto,
+            quantidade_atual=1,
+            quantidade_minima=2,
+        )
+
+        notificar_estoque_baixo(estoque)
+        Notificacao.objects.update(lida=True)
+        notificar_estoque_baixo(estoque)
+
+        self.assertEqual(
+            Notificacao.objects.filter(
+                usuario=usuario,
+                tipo='estoque_baixo',
+            ).count(),
+            1,
+        )
+
