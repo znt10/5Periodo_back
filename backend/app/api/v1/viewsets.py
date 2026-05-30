@@ -25,7 +25,8 @@ from .serializers import (
     LojaSerializer,
     EstoqueSerializer,
     EstoqueUpdateSerializer,
-    NotificacaoSerializer
+    NotificacaoSerializer,
+    VendaCreateSerializer,
 )
 from app.permissions import IsGerenteOrAdministrador, IsGerenteOrAdministradorOrResponsavel
 from app.notifications import notificar_estoques_baixos_do_pedido, notificar_estoque_baixo
@@ -281,6 +282,25 @@ class PedidoViewSet( viewsets.ModelViewSet):
 
         serializer = self.get_serializer(pedido)
         return Response(serializer.data)
+
+
+class VendaViewSet(viewsets.GenericViewSet):
+    queryset = Pedido.objects.all().order_by('-data_pedido')
+    serializer_class = VendaCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        pedido = serializer.save()
+
+        return Response(
+            {
+                "detail": "Venda finalizada com sucesso.",
+                "pedido": PedidoSerializer(pedido).data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 # 🔹 USUÁRIO
 class UsuarioViewSet(UserOuAdminMixin, viewsets.ModelViewSet):
