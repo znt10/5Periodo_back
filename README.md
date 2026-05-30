@@ -45,7 +45,31 @@ Para parar o container:
 docker compose down
 ```
 
-## Usuario Admin Padrao
+## Banco de Dados
+
+O projeto usa MySQL. As variaveis ficam em `.env`:
+
+```env
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001
+CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001
+
+SECRET_KEY=f+c^2ef777*@@(ks2t@!)-lchgc2ad$$u@!z=7ahiz8bcg307a)
+
+DB_ENGINE=django.db.backends.mysql
+DB_NAME=p5
+DB_USER=root
+DB_PASSWORD=12345
+DB_HOST=localhost
+DB_PORT=3306
+
+DJANGO_SETTINGS_MODULE=backend.settings
+
+
+
+```
 
 Login:
 
