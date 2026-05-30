@@ -40,8 +40,8 @@ class PedidoAPITestCase(APITestCase):
     
         self.produto = Produto.objects.create(
             nome_produto="coxinha",
-            codigo=1,
-            unidade_medida="kg"
+            unidade_medida="QUILO",
+            categoria="SALGADOS_GDE",
         )
         # Loja
         self.loja = Loja.objects.create(
@@ -107,9 +107,8 @@ class PedidoAPITestCase(APITestCase):
 
         produto_data = {
             "nome_produto": "Produto X",
-            "codigo": "PX",
-            "unidade_medida": "un",
-            "ativo": True
+            "unidade_medida": "UNIDADE",
+            "categoria": "MERCADO",
         }
 
         response = self.client.post(url_produto, produto_data)
@@ -156,9 +155,8 @@ class PedidoAPITestCase(APITestCase):
 
         data = {
             "nome_produto": "Produto Teste",
-            "codigo": "PT",
-            "unidade_medida": "un",
-            "ativo": True
+            "unidade_medida": "UNIDADE",
+            "categoria": "MERCADO",
         }
 
         response = self.client.post(url, data)
@@ -211,7 +209,7 @@ class NotificacaoEstoqueBaixoTestCase(TestCase):
         )
         produto = Produto.objects.create(
             nome_produto='Coxinha',
-            codigo='COX',
+            categoria='SALGADOS_GDE',
             estoque_minimo_sugerido=5,
         )
         estoque = Estoque.objects.create(
@@ -250,7 +248,7 @@ class NotificacaoEstoqueBaixoTestCase(TestCase):
         )
         produto = Produto.objects.create(
             nome_produto='Esfiha',
-            codigo='ESF',
+            categoria='ESFIHAS_GDE',
         )
         estoque = Estoque.objects.create(
             loja=loja,
